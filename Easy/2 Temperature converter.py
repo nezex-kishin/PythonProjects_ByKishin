@@ -16,7 +16,7 @@ try:
         if income_temperature == 1 and outcome_temperature == 2:
             print(f'Итог: {round((a*(9/5))+32,1)} F\n')
         elif income_temperature == 2 and outcome_temperature == 1:
-            print(f'Итог: {round((a-32)*(9/5),1)} C\n')
+            print(f'Итог: {round((a-32)*(5/9),1)} C\n')
         elif income_temperature == 1 and outcome_temperature == 3:
             print(f'Итог: {round(a+273.15,1)} K\n')
         elif income_temperature == 3 and outcome_temperature == 1:
