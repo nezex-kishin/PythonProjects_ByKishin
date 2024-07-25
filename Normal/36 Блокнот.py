@@ -1,6 +1,5 @@
 from tkinter import *
 from tkinter import messagebox
-from tkinter import filedialog
 import os
 
 
@@ -9,31 +8,33 @@ root.geometry('600x400')
 root.title('Блокнот')
 root.resizable(width=False,height=False)
 root.config(bg = '#F0E68C')
+file_index = ''
 
+#Окно с созданием файла
 def create_file():
     def close_newwindow():
-        global file, text_field
-        if messagebox.askyesnocancel(title = 'Выход',message = 'Хотите сохранить файл?') == True:
-            file.write = (f'{text_field.get("1.0",END)}')
+        a = messagebox.askyesnocancel(title = 'Выход',message = 'Хотите сохранить файл?')
+        global file, text_field, name
+        if a == True:
+            file = open(f'{name}.txt','w',encoding='UTF-8')
+            file.write(text_field.get('1.0',END))
             file.close()
             newwindow.destroy()
-        elif messagebox.askyesnocancel(title = 'Выход',message = 'Хотите сохранить файл?') == False:
-            file.close()
+        elif a == False:
             newwindow.destroy()
-        else:
-            pass
     def create():
-        global file, text_field
+        global file, text_field, name
         while True:
-            if file_name_entry.get() == '':
+            name = file_name_entry.get()
+            if name == '':
                 messagebox.showerror(title = 'Ошибка!',message='Поле пустое')
                 break
             else:
-                if os.path.exists(f'{file_name_entry.get()}') == True:
+                if os.path.exists(f'{name}') == True:
                     messagebox.showerror(title = 'Ошибка!',message='Такой файл уже существует, выберите другое название')
                     break
                 else:
-                    file = open(f'{file_name_entry.get()}','w+',encoding='UTF-8')
+                    file = open(f'{name}.txt','a+',encoding='UTF-8')
                     createbutton.destroy()
                     file_name_entry.destroy()
                     f_text = Frame(newwindow)
@@ -53,12 +54,74 @@ def create_file():
     newwindow.config(bg = '#F0E68C')
     newwindow.resizable(width=FALSE, height=FALSE)
     newwindow.protocol('WM_DELETE_WINDOW',close_newwindow)
-    file_name_entry = Entry(newwindow)
-    file_name_entry.pack(anchor = CENTER,expand = True)
-    createbutton = Button(newwindow,text = 'Создать', command=create)
-    createbutton.pack()
+    file_name_entry = Entry(newwindow,font = ('Georgia',13))
+    file_name_entry.place(y = 240, x = 300)
+    createbutton = Button(newwindow,
+                          text = 'Создать',
+                          font = ('Georgia',13),
+                          command=create,
+                          bg = '#8B4513',
+                          fg = '#F0E68C')
+    createbutton.pack(anchor = CENTER,expand = True)
 
+#Окно с открытым файлом
+def open_file():
+    def open_selected():
+        global file_index,txts
+        selected_file = files_listbox.curselection()
+        for i in selected_file:
+            file_index = txt_files[i]
+            txt = open(f'{file_index}','r',encoding='UTF-8')
+            open_button.destroy()
+            files_listbox.destroy()
+            f_text = Frame(opened_file)
+            f_text.pack(fill=BOTH, expand=1)
+            txts = Text(f_text,
+                              fg='black',
+                              wrap=WORD,
+                              spacing3=10,
+                              width=30,
+                              font=('Georgia', 14)
+                              )
+            txts.pack(expand=1, fill=BOTH, side=LEFT)
+            text = txt.read()
+            txts.insert('1.0',f'{text}')
+    def close_openfile():
+        global txts
+        a = messagebox.askyesnocancel(title='Выход', message='Хотите сохранить файл?')
+        if a == True:
+            file = open(f'{file_index}', 'w+', encoding='UTF-8')
+            file.write(txts.get('1.0',END))
+            file.close()
+            opened_file.destroy()
+        elif a == False:
+            opened_file.destroy()
 
+    opened_file = Toplevel(root)
+    opened_file.protocol('WM_DELETE_WINDOW', close_openfile)
+    opened_file.title('Блокнот')
+    opened_file.geometry('800x600')
+    opened_file.config(bg='#F0E68C')
+    opened_file.resizable(width=FALSE, height=FALSE)
+    txt_files = []
+    path = 'C:/Python/100PythonProjects/Normal/'
+    allfiles = os.listdir(path)
+    for i in range(len(allfiles)):
+        if allfiles[i].endswith('.txt'):
+            txt_files.append(allfiles[i])
+
+    files_listbox = Listbox(opened_file,
+                            font=('Georgia', 13), )
+    for i in range(len(txt_files)):
+        files_listbox.insert(i, txt_files[i])
+    files_listbox.pack()
+    open_button = Button(opened_file,
+                         text='Открыть файл',
+                         font=('Georgia', 13),
+                         bg='#8B4513',
+                         fg='#F0E68C',
+                         command=open_selected)
+    open_button.pack()
 
 choose_option = Label(root,
                       text = 'Выберите опцию',
@@ -78,10 +141,8 @@ open_txt = Button(root,
                   text = 'Открыть файл',
                   font=('Georgia', 20),
                   bg = '#F0E68C',
-                  fg = '#8B4513')
+                  fg = '#8B4513',
+                  command=open_file)
 open_txt.place(x = 195,y = 250)
-
-
-
 
 root.mainloop()
